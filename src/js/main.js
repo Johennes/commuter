@@ -196,6 +196,11 @@
   var directionService = new DirectionService();
   var rectService = new RectService()
   
+  var numRequests = 0;
+  var startOfFirstRequest = null;
+  var startOfLastRequest = null;
+  var durationOfLastRequest = 0;
+  
   const GRID_SIZE = 20;
   const GRID_SPACING = 1;
   
@@ -223,6 +228,8 @@
     rectService.removeAllRects();
     
     var midPoint = calculateMidPoint(position1, position2);
+    
+    numRequests = 0;
     
     walk(position1, position2, midPoint, 0, 0);
   }
@@ -258,8 +265,25 @@
     var lng = center.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
     var position = new google.maps.LatLng(lat, lng);
     
+    
+    if (!startOfFirstRequest) {
+      startOfFirstRequest = new Date();
+    }
+    
+    startOfLastRequest = new Date();
+    
+    $('.progressBar').css('margin-left', '-100%');
+    
     directionService.getTravelDuration(position, destination1, function(duration1) {
+      $('.progressBar').css('margin-left', '-50%');
+      
       directionService.getTravelDuration(position, destination2, function(duration2) {
+        var endOfLastRequest = new Date();
+        durationOfLastRequest = endOfLastRequest.getTime() - startOfLastRequest.getTime();
+        ++numRequests;
+        
+        $('.progressBar').css('margin-left', '0%');
+        
         rectService.addRect(position, GRID_SPACING, duration1, duration2);
         
         if (loop === 0 || cell === 8 * loop - 1) {
