@@ -77,12 +77,13 @@
   };
   
   
-  MapService.prototype.getMarker = function(index) {
-    if (!this.map || index > this.inputs.length - 1) {
+  MapService.prototype.getMarkerPosition = function(index) {
+    if (!this.map || index < 0 || index > this.inputs.length - 1) {
       return null;
     }
     
-    return this.inputs[index].marker;
+    var marker = this.inputs[index].marker;
+    return marker ? marker.getPosition() : null;
   };
   
   
@@ -94,24 +95,24 @@
     var sw = null, ne = null;
     
     for (var i = 0; i < this.inputs.length; ++i) {
-      var marker = this.getMarker(i);
+      var position = this.getMarkerPosition(i);
       
-      if (! marker) {
+      if (! position) {
         continue;
       }
       
       if (sw === null) {
-        sw = marker.getPosition();
+        sw = position;
       } else {
-        sw = new google.maps.LatLng(Math.min(sw.lat(), marker.position.lat()),
-                                    Math.min(sw.lng(), marker.position.lng()));
+        sw = new google.maps.LatLng(Math.min(sw.lat(), position.lat()),
+                                    Math.min(sw.lng(), position.lng()));
       }
       
       if (ne === null) {
-        ne = marker.getPosition();
+        ne = position;
       } else {
-        ne = new google.maps.LatLng(Math.max(ne.lat(), marker.position.lat()),
-                                    Math.max(ne.lng(), marker.position.lng()));
+        ne = new google.maps.LatLng(Math.max(ne.lat(), position.lat()),
+                                    Math.max(ne.lng(), position.lng()));
       }
     }
     
@@ -221,11 +222,11 @@
   function onLocationChanged() {
     mapService.panToMarkers();
     
-    var marker1 = mapService.getMarker(0);
-    var marker2 = mapService.getMarker(1);
+    var position1 = mapService.getMarkerPosition(0);
+    var position2 = mapService.getMarkerPosition(1);
     
-    if (marker1 && marker2) {
-      calculateDirections(marker1.getPosition(), marker2.getPosition());
+    if (position1 && position2) {
+      calculateDirections(position1, position2);
     }
   }
   
