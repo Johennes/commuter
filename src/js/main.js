@@ -199,6 +199,58 @@
   };
   
   
+  function SpiralingGridWalker(callback) {
+    this.callback = callback;
+    this.loopIndex = 0;
+    this.cellIndex = 0;
+  }
+  
+  
+  SpiralingGridWalker.prototype.step = function() {
+    var x = null, y = null;
+    
+    if (this.loopIndex === 0) {
+      x = 0;
+      y = 0;
+    } else {
+      var edgeLength = 2 * this.loopIndex + 1;
+      
+      if (this.cellIndex < edgeLength) { // Left border
+        x = -this.loopIndex;
+        y = this.loopIndex - this.cellIndex;
+      } else if (this.cellIndex < 2 * edgeLength - 1) { // Bottom border
+        x = -this.loopIndex + this.cellIndex - (edgeLength - 1);
+        y = -this.loopIndex;
+      } else if (this.cellIndex < 3 * edgeLength -2) { // Right border
+        x = this.loopIndex;
+        y = -this.loopIndex + this.cellIndex - (2 * edgeLength - 2);
+      } else { // Top border
+        x = this.loopIndex - this.cellIndex + (3 * edgeLength - 3);
+        y = this.loopIndex;
+      }
+    }
+    
+    this.callback(x, y);
+    
+    if (this.loopFinished()) {
+      this.loopIndex += 1;
+      this.cellIndex = 0;
+    } else {
+      this.cellIndex += 1;
+    }
+  };
+  
+  
+  SpiralingGridWalker.prototype.loopFinished = function() {
+    return (this.loopIndex === 0 || this.cellIndex === 8 * this.loopIndex - 1);
+  };
+  
+  
+  SpiralingGridWalker.prototype.getLoopIndex = function() {
+    return this.loopIndex;
+  };
+  
+  
   var mapService = new MapService();
   var directionService = new DirectionService();
   var rectService = new RectService(mapService)
@@ -222,89 +274,53 @@
   function onLocationChanged() {
     mapService.panToMarkers();
     
-    var position1 = mapService.getMarkerPosition(0);
-    var position2 = mapService.getMarkerPosition(1);
+    var destination1 = mapService.getMarkerPosition(0);
+    var destination2 = mapService.getMarkerPosition(1);
     
-    if (position1 && position2) {
-      calculateDirections(position1, position2);
+    if (destination1 && destination2) {
+      calculateDirections(destination1, destination2);
     }
   }
   
   
-  function calculateDirections(position1, position2) {
-    rectService.removeAllRects();
-    
-    var midPoint = calculateMidPoint(position1, position2);
+  function calculateDirections(destination1, destination2) {
+    var midPoint = calculateMidPoint(destination1, destination2);
     
     numRequests = 0;
     
-    walk(position1, position2, midPoint, 0, 0);
-  }
-  
-  
-  function walk(destination1, destination2, center, loop, cell) {
-    var x = null, y = null;
-    
-    if (loop === 0) {
-      x = 0;
-      y = 0;
-    } else {
-      var edgeLength = 2 * loop + 1;
+    var walker = new SpiralingGridWalker(function(x, y) {
+      var lat = midPoint.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
+      var lng = midPoint.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
+      var position = new google.maps.LatLng(lat, lng);
       
-      if (cell < edgeLength) { // Left border
-        x = -loop;
-        y = loop - cell;
-      } else if (cell < 2 * edgeLength - 1) { // Bottom border
-        x = -loop + cell - (edgeLength - 1);
-        y = -loop;
-      } else if (cell < 3 * edgeLength -2) { // Right border
-        x = loop;
-        y = -loop + cell - (2 * edgeLength - 2);
-      } else { // Top border
-        x = loop - cell + (3 * edgeLength - 3);
-        y = loop;
+      if (!startOfFirstRequest) {
+        startOfFirstRequest = new Date();
       }
-    }
-    
-    var lat = center.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
-    var lng = center.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
-    var position = new google.maps.LatLng(lat, lng);
-    
-    
-    if (!startOfFirstRequest) {
-      startOfFirstRequest = new Date();
-    }
-    
-    startOfLastRequest = new Date();
-    
-    $('.progressBar').css('margin-left', '-100%');
-    
-    directionService.getTravelDuration(position, destination1, function(duration1) {
-      $('.progressBar').css('margin-left', '-50%');
       
-      directionService.getTravelDuration(position, destination2, function(duration2) {
-        var endOfLastRequest = new Date();
-        durationOfLastRequest = endOfLastRequest.getTime() - startOfLastRequest.getTime();
-        ++numRequests;
+      startOfLastRequest = new Date();
+      
+      $('.progressBar').css('margin-left', '-100%');
+      
+      directionService.getTravelDuration(position, destination1, function(duration1) {
+        $('.progressBar').css('margin-left', '-50%');
         
-        $('.progressBar').css('margin-left', '0%');
-        
-        rectService.addRect(position, GRID_SPACING, duration1, duration2);
-        
-        if (loop === 0 || cell === 8 * loop - 1) {
-          ++loop;
-          cell = 0;
-        } else {
-          ++cell;
-        }
-        
-        if (loop < 10) {
-          setTimeout(function() {
-            walk(destination1, destination2, center, loop, cell);
-          }, 0);
-        }
+        directionService.getTravelDuration(position, destination2, function(duration2) {
+          var endOfLastRequest = new Date();
+          durationOfLastRequest = endOfLastRequest.getTime() - startOfLastRequest.getTime();
+          ++numRequests;
+          
+          $('.progressBar').css('margin-left', '0%');
+          
+          rectService.addRect(position, GRID_SPACING, duration1, duration2);
+          
+          if (walker.getLoopIndex() < 9) {
+            walker.step();
+          }
+        });
       });
     });
+    
+    walker.step();
   }
   
   
