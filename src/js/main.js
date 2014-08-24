@@ -255,11 +255,6 @@
   var directionService = new DirectionService();
   var rectService = new RectService(mapService)
   
-  var numRequests = 0;
-  var startOfFirstRequest = null;
-  var startOfLastRequest = null;
-  var durationOfLastRequest = 0;
-  
   const GRID_SIZE = 20;
   const GRID_SPACING = 1;
   
@@ -286,18 +281,10 @@
   function calculateDirections(destination1, destination2) {
     var midPoint = calculateMidPoint(destination1, destination2);
     
-    numRequests = 0;
-    
     var walker = new SpiralingGridWalker(function(x, y) {
       var lat = midPoint.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
       var lng = midPoint.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
       var position = new google.maps.LatLng(lat, lng);
-      
-      if (!startOfFirstRequest) {
-        startOfFirstRequest = new Date();
-      }
-      
-      startOfLastRequest = new Date();
       
       $('.progressBar').css('margin-left', '-100%');
       
@@ -305,10 +292,6 @@
         $('.progressBar').css('margin-left', '-50%');
         
         directionService.getTravelDuration(position, destination2, function(duration2) {
-          var endOfLastRequest = new Date();
-          durationOfLastRequest = endOfLastRequest.getTime() - startOfLastRequest.getTime();
-          ++numRequests;
-          
           $('.progressBar').css('margin-left', '0%');
           
           rectService.addRect(position, GRID_SPACING, duration1, duration2);
