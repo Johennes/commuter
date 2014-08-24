@@ -128,6 +128,11 @@
   };
   
   
+  MapService.prototype.addRect = function(rect) {
+    rect.setMap(this.map);
+  };
+  
+  
   function DirectionService() {
     this.service = new google.maps.DirectionsService();
   }
@@ -156,7 +161,8 @@
   };
   
   
-  function RectService() {
+  function RectService(mapService) {
+    this.mapService = mapService;
     this.rects = new Array();
   }
   
@@ -180,21 +186,23 @@
     var colorString = '#' + (red < 16 ? '0' : '') + red.toString(16).toUpperCase() + (green < 16 ? '0' : '') + green.toString(16).toUpperCase() + '00';
     console.log(colorString);
     
-    return new google.maps.Rectangle({
+    var rect = new google.maps.Rectangle({
       bounds: new google.maps.LatLngBounds(sw, ne),
       strokeColor: colorString,
       strokeOpacity: 0.5,
       strokeWeight: 1,
       fillColor: colorString,
-      fillOpacity: 0.2,
-      map: mapService.map
+      fillOpacity: 0.2
     });
+    
+    this.mapService.addRect(rect);
+    this.rects.push(rect);
   };
   
   
   var mapService = new MapService();
   var directionService = new DirectionService();
-  var rectService = new RectService()
+  var rectService = new RectService(mapService)
   
   var numRequests = 0;
   var startOfFirstRequest = null;
