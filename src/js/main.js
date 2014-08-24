@@ -178,21 +178,31 @@
   
   
   RectService.prototype.createRect = function(position, size, duration1, duration2) {
-    var sw = new google.maps.LatLng(position.lat() - deltaKmToDeltaLatitude(size / 2.0), position.lng() - deltaKmToDeltaLongitude(size / 2.0, position.lat()));
-    var ne = new google.maps.LatLng(position.lat() + deltaKmToDeltaLatitude(size / 2.0), position.lng() + deltaKmToDeltaLongitude(size / 2.0, position.lat()));
+    var swLat = position.lat() - deltaKmToDeltaLatitude(size / 2.0);
+    var swLng = position.lng() - deltaKmToDeltaLongitude(size / 2.0, swLat);
+    var sw = new google.maps.LatLng(swLat, swLng);
+    
+    var neLat = position.lat() + deltaKmToDeltaLatitude(size / 2.0);
+    var neLng = position.lng() + deltaKmToDeltaLongitude(size / 2.0, neLat);
+    var ne = new google.maps.LatLng(neLat, neLng);
     
     var red = Math.round(Math.min(duration1 + duration2, 7200) / 7200 * 255);
     var green = 255 - red;
-    var colorString = '#' + (red < 16 ? '0' : '') + red.toString(16).toUpperCase() + (green < 16 ? '0' : '') + green.toString(16).toUpperCase() + '00';
+    var colorString = '#' + this.colorComponentToString(red) + this.colorComponentToString(green) + '00';
     
     return new google.maps.Rectangle({
-      bounds: new google.maps.LatLngBounds(sw, ne),
-      strokeColor: colorString,
+      bounds:        new google.maps.LatLngBounds(sw, ne),
+      strokeColor:   colorString,
       strokeOpacity: 0.5,
-      strokeWeight: 1,
-      fillColor: colorString,
-      fillOpacity: 0.2
+      strokeWeight:  1,
+      fillColor:     colorString,
+      fillOpacity:   0.2
     });
+  };
+  
+  
+  RectService.prototype.colorComponentToString = function(component) {
+    return (component < 16 ? '0' : '') + component.toString(16).toUpperCase();
   };
   
   
