@@ -279,7 +279,9 @@
   
   
   function calculateDirections(destination1, destination2) {
-    var midPoint = calculateMidPoint(destination1, destination2);
+    var midPointLat = (destination1.lat() + destination2.lat()) / 2.0;
+    var midPointLng = (destination1.lng() + destination2.lng()) / 2.0;
+    var midPoint = new google.maps.LatLng(midPointLat, midPointLng);
     
     var walker = new SpiralingGridWalker(function(x, y) {
       var lat = midPoint.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
@@ -304,12 +306,6 @@
     });
     
     walker.step();
-  }
-  
-  
-  function calculateMidPoint(position1, position2) {
-    return new google.maps.LatLng((position1.lat() + position2.lat()) / 2.0,
-                                  (position1.lng() + position2.lng()) / 2.0);
   }
   
   
