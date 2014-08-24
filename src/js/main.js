@@ -3,6 +3,7 @@
   function MapService() {
     this.map = null;
     this.inputs = new Array();
+    this.rects = new Array();
   }
   
   
@@ -131,6 +132,16 @@
   
   MapService.prototype.addRect = function(rect) {
     rect.setMap(this.map);
+    this.rects.push(rect);
+  };
+  
+  
+  MapService.prototype.removeAllRects = function() {
+    for (var i = 0; i < this.rects.length; ++i) {
+      this.rects[i].setMap(null);
+    }
+    
+    this.rects = new Array();
   };
   
   
@@ -162,22 +173,11 @@
   };
   
   
-  function RectService(mapService) {
-    this.mapService = mapService;
-    this.rects = new Array();
+  function RectService() {
   }
   
   
-  RectService.prototype.removeAllRects = function() {
-    for (var i = 0; i < this.rects.length; ++i) {
-      this.rects[i].setMap(null);
-    }
-    
-    this.rects = new Array();
-  };
-  
-  
-  RectService.prototype.addRect = function(position, size, duration1, duration2) {
+  RectService.prototype.createRect = function(position, size, duration1, duration2) {
     var sw = new google.maps.LatLng(position.lat() - deltaKmToDeltaLatitude(size / 2.0), position.lng() - deltaKmToDeltaLongitude(size / 2.0, position.lat()));
     var ne = new google.maps.LatLng(position.lat() + deltaKmToDeltaLatitude(size / 2.0), position.lng() + deltaKmToDeltaLongitude(size / 2.0, position.lat()));
     
@@ -185,7 +185,7 @@
     var green = 255 - red;
     var colorString = '#' + (red < 16 ? '0' : '') + red.toString(16).toUpperCase() + (green < 16 ? '0' : '') + green.toString(16).toUpperCase() + '00';
     
-    var rect = new google.maps.Rectangle({
+    return new google.maps.Rectangle({
       bounds: new google.maps.LatLngBounds(sw, ne),
       strokeColor: colorString,
       strokeOpacity: 0.5,
@@ -193,9 +193,6 @@
       fillColor: colorString,
       fillOpacity: 0.2
     });
-    
-    this.mapService.addRect(rect);
-    this.rects.push(rect);
   };
   
   
@@ -253,7 +250,7 @@
   
   var mapService = new MapService();
   var directionService = new DirectionService();
-  var rectService = new RectService(mapService)
+  var rectService = new RectService()
   
   const GRID_SIZE = 20;
   const GRID_SPACING = 1;
@@ -267,6 +264,7 @@
   
   
   function onLocationChanged() {
+    mapService.removeAllRects();
     mapService.panToMarkers();
     
     var destination1 = mapService.getMarkerPosition(0);
@@ -286,17 +284,18 @@
     var walker = new SpiralingGridWalker(function(x, y) {
       var lat = midPoint.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
       var lng = midPoint.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
-      var position = new google.maps.LatLng(lat, lng);
+      var origin = new google.maps.LatLng(lat, lng);
       
       $('.progressBar').css('margin-left', '-100%');
       
-      directionService.getTravelDuration(position, destination1, function(duration1) {
+      directionService.getTravelDuration(origin, destination1, function(duration1) {
         $('.progressBar').css('margin-left', '-50%');
         
-        directionService.getTravelDuration(position, destination2, function(duration2) {
+        directionService.getTravelDuration(origin, destination2, function(duration2) {
           $('.progressBar').css('margin-left', '0%');
           
-          rectService.addRect(position, GRID_SPACING, duration1, duration2);
+          var rect = rectService.createRect(origin, GRID_SPACING, duration1, duration2);
+          mapService.addRect(rect);
           
           if (walker.getLoopIndex() < 9) {
             walker.step();
@@ -310,13 +309,13 @@
   
   
   function deltaKmToDeltaLatitude(km) {
-    // 1° lat = 110.54km => 1km = 1° / 110.54
+    // 1° lat ~ 110.54km => 1km ~ 1° / 110.54
     return km / 110.54;
   }
   
   
   function deltaKmToDeltaLongitude(km, lat) {
-    // 1° lng = 111.32km * cos(lat) => 1km = 1° / 111.32 / cos(lat)
+    // 1° lng ~ 111.32km * cos(lat) => 1km ~ 1° / 111.32 / cos(lat)
     return km / 111.32 / Math.cos(lat / 180 * Math.PI);
   }
   
