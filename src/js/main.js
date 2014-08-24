@@ -179,12 +179,10 @@
   RectService.prototype.addRect = function(position, size, duration1, duration2) {
     var sw = new google.maps.LatLng(position.lat() - deltaKmToDeltaLatitude(size / 2.0), position.lng() - deltaKmToDeltaLongitude(size / 2.0, position.lat()));
     var ne = new google.maps.LatLng(position.lat() + deltaKmToDeltaLatitude(size / 2.0), position.lng() + deltaKmToDeltaLongitude(size / 2.0, position.lat()));
-    console.log('sw: ' + sw + ' ne: ' + ne);
     
     var red = Math.round(Math.min(duration1 + duration2, 7200) / 7200 * 255);
     var green = 255 - red;
     var colorString = '#' + (red < 16 ? '0' : '') + red.toString(16).toUpperCase() + (green < 16 ? '0' : '') + green.toString(16).toUpperCase() + '00';
-    console.log(colorString);
     
     var rect = new google.maps.Rectangle({
       bounds: new google.maps.LatLngBounds(sw, ne),
@@ -266,8 +264,6 @@
         y = loop;
       }
     }
-    
-    console.log(loop, cell, x, y);
     
     var lat = center.lat() + deltaKmToDeltaLatitude(GRID_SPACING * y);
     var lng = center.lng() + deltaKmToDeltaLongitude(GRID_SPACING * x, lat);
