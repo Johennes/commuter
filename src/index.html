@@ -3,20 +3,31 @@
   <head>
     <meta charset="UTF-8">
     <title></title>
+    <link type='text/css' rel='stylesheet' href='http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz'>
     <link type="text/css" rel="stylesheet" href="css/main.css">
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
     <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?libraries=places&sensor=false"></script>
     <script type="text/javascript" src="js/main.js"></script>
   </head>
   <body>
-    <label for="location1">Your Work Address</label>
-    <input type="text" name="location1" id="location1">
-    <label for="location2">Your Partner's Work Address</label>
-    <input type="text" name="location2" id="location2">
-    <div id="map"></div>
-    <div id="progress"></div>
-    <div class="progressBarContainer">
-      <div class="progressBar"></div>
+    <div id="main">
+      <form id="input_data">
+        <div class="floatLeft">
+          <label for="location1">Your Work Address:</label>
+          <input type="text" name="location1" id="location1">
+        </div>
+        <div class="floatRight">
+          <label for="location2">Your Partner's Work Address:</label>
+          <input type="text" name="location2" id="location2">
+        </div>
+      </form>
+      <div id="map"></div>
+      <div>
+        <div class="progressBarContainer floatRight">
+          <div class="progressBar"></div>
+        </div>
+        <div class="progressBarLabel floatRight">Progress:</div>
+      </div>
     </div>
   </body>
 </html>
