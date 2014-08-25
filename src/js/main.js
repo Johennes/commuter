@@ -188,7 +188,7 @@
     var neLng = position.lng() + deltaKmToDeltaLongitude(size / 2.0, neLat);
     var ne = new google.maps.LatLng(neLat, neLng);
     
-    var red = Math.round(Math.min(duration1 + duration2, 7200) / 7200 * 255);
+    var red = Math.round(Math.min(duration1 + duration2, 10800) / 10800 * 255);
     var green = 255 - red;
     var colorString = '#' + this.colorComponentToString(red) + this.colorComponentToString(green) + '00';
     
