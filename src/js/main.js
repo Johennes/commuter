@@ -166,6 +166,8 @@
         setTimeout(function() {
           ref.getTravelDuration(from, to, callback);
         }, 1000);
+      } else if (status === 'ZERO_RESULTS') {
+        callback(NaN);
       } else if (status === 'OK') {
         callback(result.routes[0].legs[0].duration.value);
       }
