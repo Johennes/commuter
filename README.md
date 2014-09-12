@@ -16,3 +16,5 @@ Please note that due to Google Maps' quota restrictions, the application will
 generally be slow to calculate transit times. Most of the time the program
 will just sit idle and wait for the Google Maps API to return another
 directions result.
+
+![commuter](screenshots/2014-09-12.png)
