@@ -4,6 +4,7 @@
     this.map = null;
     this.inputs = new Array();
     this.rects = new Array();
+    this.infoWindow = null;
   }
   
   
@@ -130,13 +131,36 @@
   };
   
   
-  MapService.prototype.addRect = function(rect) {
+  MapService.prototype.addRect = function(rect, duration1, duration2) {
     rect.setMap(this.map);
     this.rects.push(rect);
+    
+    var ref = this;
+    
+    google.maps.event.addListener(rect, 'click', function() {
+      if (ref.infoWindow === null) {
+        ref.infoWindow = new google.maps.InfoWindow();
+      } else {
+        ref.infoWindow.close();
+      }
+      
+      var html = '<span>' + Math.floor(duration1 / 60) + ' minutes to '
+               + ref.inputs[0].getPlace().name + '</span><br/>'
+               + '<span>' + Math.floor(duration2 / 60) + ' minutes to '
+               + ref.inputs[1].getPlace().name + '</span>';
+      ref.infoWindow.setContent(html);
+      ref.infoWindow.setPosition(rect.getBounds().getCenter());
+      ref.infoWindow.open(ref.map);
+    });
   };
   
   
   MapService.prototype.removeAllRects = function() {
+    if (this.infoWindow !== null) {
+      this.infoWindow.close();
+      this.infoWindow = null;
+    }
+    
     for (var i = 0; i < this.rects.length; ++i) {
       this.rects[i].setMap(null);
     }
@@ -307,7 +331,7 @@
           $('.progressBar').css('margin-left', '0%');
           
           var rect = rectService.createRect(origin, GRID_SPACING, duration1, duration2);
-          mapService.addRect(rect);
+          mapService.addRect(rect, duration1, duration2);
           
           if (walker.getLoopIndex() < 9) {
             walker.step();
