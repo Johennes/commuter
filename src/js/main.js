@@ -17,6 +17,14 @@
       center: new google.maps.LatLng(52.5167, 13.3833), // Berlin for the win!! :)
       zoom:   11
     });
+    
+    var ref = this;
+    
+    google.maps.event.addListener(this.map, 'click', function() {
+      if (ref.infoWindow !== null) {
+        ref.infoWindow.close();
+      }
+    });
   };
   
   
