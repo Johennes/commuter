@@ -222,7 +222,7 @@
       strokeOpacity: 0.5,
       strokeWeight:  1,
       fillColor:     colorString,
-      fillOpacity:   0.2
+      fillOpacity:   0.5
     });
   };
   
