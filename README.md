@@ -21,4 +21,4 @@ directions result.
 
 ### Screenshots
 
-![commuter](screenshots/2014-09-12.png)
+![Main interface](screenshots/main-interface.png)
