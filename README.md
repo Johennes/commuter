@@ -1,7 +1,7 @@
 commuter
 ========
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+*Mirrors: [GitHub] ~ [GitLab]*
 
 Maps-driven browser app to find the best place to live for commuters
 
@@ -22,3 +22,6 @@ directions result.
 ### Screenshots
 
 ![Main interface](screenshots/main-interface.png)
+
+[GitHub]: https://github.com/Johennes/commuter
+[GitLab]: https://gitlab.com/cherrypicker/commuter
